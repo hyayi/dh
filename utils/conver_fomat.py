@@ -7,7 +7,7 @@ def coordinateCvt2YOLO(size, box):
     dh = 1. / size[1]
 
         # (xmin + xmax / 2)
-    x = (box[0] + box[2]) / 2.a0
+    x = (box[0] + box[2]) / 2.0
         # (ymin + ymax / 2)
     y = (box[1] + box[3]) / 2.0
 
