@@ -1,6 +1,6 @@
 # train and val datasets (image directory or *.txt file with image paths)
-train: /content/drive/MyDrive/dh/coco/images # 118k images
-val: /content/drive/MyDrive/dh/coco/images # 5k imagescd
+train: /content/drive/MyDrive/dh/coco/images/train # 118k images
+val: /content/drive/MyDrive/dh/coco/images/train # 5k imagescd
 #test: /content/drive/MyDrive/dh/coco/val  # 20k images for submission to https://competitions.codalab.org/competitions/20794
 
 # number of classes
