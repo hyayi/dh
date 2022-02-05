@@ -35,7 +35,7 @@ def convert_to_yolo(json_data,class_name,save):
         f.write(f"{class_name} {yolo_box[0]} {yolo_box[1]} {yolo_box[2]} {yolo_box[3]} \n")
 
 
-def fold_convert_to_yolo(path,save_path):
+def folder_convert_to_yolo(path,save_path):
     json_files = glob.glob(f"{path}/*.json")
 
     for json_path in json_files:
