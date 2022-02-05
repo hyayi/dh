@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from models.common import Conv, Bottleneck, SPP, SPPCSP, VoVCSP, DWConv, Focus, BottleneckCSP, BottleneckCSPLG, BottleneckCSPSE, BottleneckCSPSAM, BottleneckCSPSEA, BottleneckCSPSAMA, BottleneckCSPSAMB, BottleneckCSPGC, BottleneckCSPDNL, BottleneckCSP2, BottleneckCSP2SAM, Concat, DownC, DownD, DNL, GC, SAM, SAMA, NMS, autoShape, TR, BottleneckCSPTR, BottleneckCSP2TR, SPPCSPTR, ReOrg, BottleneckCSPF, ImplicitA, ImplicitM, DWT
 from models.experimental import MixConv2d, CrossConv, C3
 from utils.autoanchor import check_anchor_order
-from utils.general import make_divisible, check_file, set_logging
+from utils.general import make_divisible, check_file, set_logging, scale_stack
 from utils.torch_utils import time_synchronized, fuse_conv_and_bn, model_info, scale_img, initialize_weights, \
     select_device, copy_attr
 
@@ -23,7 +23,6 @@ try:
     import thop  # for FLOPS computation
 except ImportError:
     thop = None
-
 
 class Detect(nn.Module):
     stride = None  # strides computed during build
@@ -58,8 +57,8 @@ class Detect(nn.Module):
                 y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i].to(x[i].device)) * self.stride[i]  # xy
                 y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
                 z.append(y.view(bs, -1, self.no))
-
-        return x if self.training else (torch.cat(z, 1), x)
+        
+        return x if self.training else (scale_stack(z, 1), x)
 
     @staticmethod
     def _make_grid(nx=20, ny=20):
@@ -98,13 +97,12 @@ class IDetect(nn.Module):
             if not self.training:  # inference
                 if self.grid[i].shape[2:4] != x[i].shape[2:4]:
                     self.grid[i] = self._make_grid(nx, ny).to(x[i].device)
-
                 y = x[i].sigmoid()
-                y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  # xy
-                y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
+                y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]
+                y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]
                 z.append(y.view(bs, -1, self.no))
 
-        return x if self.training else (torch.cat(z, 1), x)
+        return x if self.training else (scale_stack(z,1), x)
 
     @staticmethod
     def _make_grid(nx=20, ny=20):
@@ -172,7 +170,7 @@ class Model(nn.Module):
                 elif fi == 3:
                     yi[..., 0] = img_size[1] - yi[..., 0]  # de-flip lr
                 y.append(yi)
-            return torch.cat(y, 1), None  # augmented inference, train
+            return torch.cat(y, 1)  # augmented inference, train
         else:
             return self.forward_once(x, profile)  # single-scale inference, train
 
