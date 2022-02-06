@@ -167,8 +167,8 @@ def test(data,
                 for p, b in zip(pred.tolist(), box.tolist()):
                     jdict.append({'image_id': image_id,
                                   'category_id': coco91class[int(p[5])] if is_coco else int(p[5]),
-                                  'bbox': [x for x in b],
-                                  'score': p[4]})
+                                  'bbox': [round(x,3) for x in b],
+                                  'score': round(p[4],5)})
 
             # Assign all predictions as incorrect
             correct = torch.zeros(pred.shape[0], niou, dtype=torch.bool, device=device)
