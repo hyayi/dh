@@ -99,12 +99,6 @@ def make_divisible(x, divisor):
     # Returns x evenly divisible by divisor
     return math.ceil(x / divisor) * divisor
 
-def scale_stack(z,dim=1,f=0.001, target = 4):
-    # returns stack and bias scale
-    z = torch.cat(z, dim)
-    z[...,target] -= f
-    return z
-
 
 def labels_to_class_weights(labels, nc=80):
     # Get class weights (inverse frequency) from training labels
